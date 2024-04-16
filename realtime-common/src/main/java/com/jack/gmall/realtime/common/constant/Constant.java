@@ -13,6 +13,7 @@ public class Constant {
 
     public static final String TOPIC_DB = "topic_db";
     public static final String TOPIC_LOG = "topic_log";
+//    public static final String DIM = "topic_log";
 
     public static final String MYSQL_HOST = "hadoop101";
     public static final int MYSQL_PORT = 3306;
@@ -20,7 +21,9 @@ public class Constant {
     public static final String MYSQL_PASSWORD = "root";
     public static final String MYSQL_WAREHOUSE_DB = "gmall2023";
     public static final String MYSQL_DIM_CONGFIG_DB = "gmall2023_config";
-    public static final String HBASE_NAMESPACE = "gmall";
+    public static final String MYSQL_DIM_TABLE = "table_process_dim";
+    public static final String HBASE_NAMESPACE = "gmall2023";
+    public static final String HBASE_ZOOKEEPER_QUORUM = "hadoop101,hadoop102,hadoop103";
 
     public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
     public static final String MYSQL_URL = "jdbc:mysql://hadoop101:3306?useSSL=false";

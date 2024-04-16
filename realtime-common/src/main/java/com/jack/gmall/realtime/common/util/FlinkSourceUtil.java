@@ -1,6 +1,9 @@
 package com.jack.gmall.realtime.common.util;
 
 import com.jack.gmall.realtime.common.constant.Constant;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
+import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -26,7 +29,7 @@ public class FlinkSourceUtil {
                 .setBootstrapServers(Constant.KAFKA_BROKERS)
                 .setGroupId(groupId)
                 .setTopics(topic)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new DeserializationSchema<String>() {
                     @Override
                     public String deserialize(byte[] message) throws IOException {
@@ -49,4 +52,18 @@ public class FlinkSourceUtil {
                 .build();
     }
 
+    public static MySqlSource<String> getMySQLSource(String dbname, String tabName) {
+        return MySqlSource
+                .<String>builder()
+                .hostname(Constant.MYSQL_HOST)
+                .username(Constant.MYSQL_USER_NAME)
+                .password(Constant.MYSQL_PASSWORD)
+                .port(Constant.MYSQL_PORT)
+                //初始化读取
+                .startupOptions(StartupOptions.initial())
+                .deserializer(new JsonDebeziumDeserializationSchema())
+                .databaseList(dbname)
+                .tableList(dbname + "." + tabName)
+                .build();
+    }
 }
