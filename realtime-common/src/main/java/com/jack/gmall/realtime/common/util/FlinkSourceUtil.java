@@ -10,6 +10,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,31 +26,38 @@ import java.nio.charset.StandardCharsets;
 public class FlinkSourceUtil {
 
     public static KafkaSource<String> getKafkaSource(String groupId, String topic) {
-        return KafkaSource.<String>builder()
-                .setBootstrapServers(Constant.KAFKA_BROKERS)
-                .setGroupId(groupId)
-                .setTopics(topic)
-                .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new DeserializationSchema<String>() {
-                    @Override
-                    public String deserialize(byte[] message) throws IOException {
-                        if (message != null) {
-                            return new String(message, StandardCharsets.UTF_8);
+        KafkaSource<String> build = null;
+        try {
+            build = KafkaSource.<String>builder()
+                    .setBootstrapServers(Constant.KAFKA_BROKERS)
+                    .setGroupId(groupId)
+                    .setTopics(topic)
+                    .setStartingOffsets(OffsetsInitializer.earliest())
+                    .setValueOnlyDeserializer(new DeserializationSchema<String>() {
+                        @Override
+                        public String deserialize(byte[] message) throws IOException {
+                            if (message != null) {
+                                return new String(message, StandardCharsets.UTF_8);
+                            }
+                            return null;
                         }
-                        return null;
-                    }
 
-                    @Override
-                    public boolean isEndOfStream(String nextElement) {
-                        return false;
-                    }
+                        @Override
+                        public boolean isEndOfStream(String nextElement) {
+                            return false;
+                        }
 
-                    @Override
-                    public TypeInformation<String> getProducedType() {
-                        return Types.STRING;
-                    }
-                })
-                .build();
+                        @Override
+                        public TypeInformation<String> getProducedType() {
+                            return Types.STRING;
+                        }
+                    })
+                    .build();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return build;
     }
 
     public static MySqlSource<String> getMySQLSource(String dbname, String tabName) {

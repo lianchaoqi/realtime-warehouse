@@ -39,7 +39,8 @@ public class DimApp extends BaseApp {
 
         //获取kafka的维度表业务数据
         SingleOutputStreamOperator<JSONObject> kafkaDimData = getKafkaDimData(stream);
-//        //获取维度表的数据
+        kafkaDimData.print();
+        //获取维度表的数据
         DataStreamSource<String> table_process_dim_source = env.fromSource(FlinkSourceUtil.getMySQLSource(
                         Constant.MYSQL_DIM_CONGFIG_DB
                         , Constant.MYSQL_DIM_TABLE)
