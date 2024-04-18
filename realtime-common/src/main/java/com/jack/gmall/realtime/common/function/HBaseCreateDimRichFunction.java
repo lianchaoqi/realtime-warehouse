@@ -70,7 +70,7 @@ public class HBaseCreateDimRichFunction extends RichFlatMapFunction<String, Tabl
     private void createTable(Connection connection, TableProcessDim tableProcessDim) {
         try {
             HBaseUtil.createTable(connection, Constant.HBASE_NAMESPACE, tableProcessDim.getSinkTable(),
-                    tableProcessDim.getSinkColumns().split(","));
+                    tableProcessDim.getSinkFamily());
         } catch (IOException e) {
             e.printStackTrace();
         }

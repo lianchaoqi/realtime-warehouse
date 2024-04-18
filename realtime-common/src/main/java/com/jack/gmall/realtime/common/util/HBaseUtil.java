@@ -1,5 +1,6 @@
 package com.jack.gmall.realtime.common.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jack.gmall.realtime.common.constant.Constant;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -7,6 +8,7 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @BelongsProject: realtime-warehouse
@@ -48,7 +50,8 @@ public class HBaseUtil {
         if (!admin.tableExists(TableName.valueOf(namespace, tableName))) {
             TableDescriptorBuilder tableDescriptorBuilder = TableDescriptorBuilder.newBuilder(TableName.valueOf(namespace, tableName));
             for (String columnFamily : columnFamilies) {
-                ColumnFamilyDescriptor columnFamilyDescriptor = ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(columnFamily)).build();
+                ColumnFamilyDescriptor columnFamilyDescriptor = ColumnFamilyDescriptorBuilder
+                        .newBuilder(Bytes.toBytes(columnFamily)).build();
                 tableDescriptorBuilder.setColumnFamily(columnFamilyDescriptor);
             }
             try {
@@ -59,7 +62,6 @@ public class HBaseUtil {
         } else {
             System.out.println(namespace + "." + tableName + "表已存在");
         }
-
         admin.close();
     }
 
@@ -77,5 +79,70 @@ public class HBaseUtil {
         }
         admin.close();
     }
+
+    /**
+     * 写入数据
+     *
+     * @param connection:     链接
+     * @param namespace：命名空间
+     * @param tableName：表名
+     * @param rowKey：主键
+     * @param columnFamily：列族
+     * @param data：列值
+     */
+    public static void putCells(Connection connection
+            , String namespace
+            , String tableName
+            , String rowKey
+            , String columnFamily
+            , JSONObject data
+    ) throws IOException {
+        Table table = connection.getTable(TableName.valueOf(namespace, tableName));
+        //插入对象
+        Put put = new Put(Bytes.toBytes(rowKey));
+        for (String column : data.keySet()) {
+            String value = data.getString(column);
+            //避免value值为空，空的不写入
+            if (value != null) {
+                put.addColumn(Bytes.toBytes(columnFamily)
+                        , Bytes.toBytes(column)
+                        , Bytes.toBytes(value));
+            }
+        }
+        //写出数据
+        try {
+            table.put(put);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        table.close();
+    }
+
+
+    /**
+     * 删除数据
+     *
+     * @param connection:    链接
+     * @param namespace：命名空间
+     * @param tableName：表名
+     * @param rowKey：主键
+     */
+    public static void deleteCells(Connection connection
+            , String namespace
+            , String tableName
+            , String rowKey
+    ) throws IOException {
+        Table table = connection.getTable(TableName.valueOf(namespace, tableName));
+
+        Delete delete = new Delete(Bytes.toBytes(rowKey));
+        try {
+            table.delete(delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        table.close();
+    }
+
 
 }

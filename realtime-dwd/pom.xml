@@ -11,6 +11,10 @@
 
     <groupId>org.jack</groupId>
     <artifactId>realtime-dwd</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>realtime-dwd-base-log</module>
+    </modules>
 
     <dependencies>
         <dependency>
