@@ -31,7 +31,7 @@ import java.util.List;
 public class DimApp extends BaseApp {
 
     public static void main(String[] args) {
-        new DimApp().start(8888, 4, "DimApp", Constant.TOPIC_DB);
+        new DimApp().start(11001, 4, "DimApp", Constant.TOPIC_DB);
     }
 
     @Override

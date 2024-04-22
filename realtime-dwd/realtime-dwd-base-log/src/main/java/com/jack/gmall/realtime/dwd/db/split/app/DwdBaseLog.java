@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jack.gmall.realtime.common.base.BaseApp;
 import com.jack.gmall.realtime.common.constant.Constant;
+import com.jack.gmall.realtime.common.util.FlinkSQLUtil;
+import com.jack.gmall.realtime.common.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -14,6 +16,7 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SideOutputDataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -31,7 +34,7 @@ import java.time.Duration;
 public class DwdBaseLog extends BaseApp {
     public static void main(String[] args) {
         new DwdBaseLog().start(
-                8888,
+                11002,
                 4,
                 "DwdBaseLog",
                 Constant.TOPIC_LOG
@@ -55,12 +58,22 @@ public class DwdBaseLog extends BaseApp {
                 , startTag, displayTag, actionsTag, processMain);
 
         //TODO 输出到kafka
-        writeToKafka(pageStreamp);
+//        writeToKafka(pageStreamp);
+        SideOutputDataStream<String> errStream = pageStreamp.getSideOutput(errTag);
+        SideOutputDataStream<String> startStream = pageStreamp.getSideOutput(startTag);
+        SideOutputDataStream<String> displayStream = pageStreamp.getSideOutput(displayTag);
+        SideOutputDataStream<String> actionsStream = pageStreamp.getSideOutput(actionsTag);
 
+        errStream.sinkTo(FlinkSinkUtil.getKafkaSink("'err", Constant.TOPIC_DWD_TRAFFIC_ERR));
+        startStream.sinkTo(FlinkSinkUtil.getKafkaSink("'start", Constant.TOPIC_DWD_TRAFFIC_START));
+        displayStream.sinkTo(FlinkSinkUtil.getKafkaSink("'display", Constant.TOPIC_DWD_TRAFFIC_DISPLAY));
+        actionsStream.sinkTo(FlinkSinkUtil.getKafkaSink("'actions", Constant.TOPIC_DWD_TRAFFIC_ACTION));
+        pageStreamp.sinkTo(FlinkSinkUtil.getKafkaSink("'page", Constant.TOPIC_DWD_TRAFFIC_PAGE));
     }
 
-    private void writeToKafka(SingleOutputStreamOperator<String> pageStreamp) {
-    }
+//    private void writeToKafka(SingleOutputStreamOperator<String> pageStreamp) {
+//        pageStreamp.getSideOutput(errTag)
+//    }
 
 
     public SingleOutputStreamOperator<String> splitLog(
@@ -89,28 +102,28 @@ public class DwdBaseLog extends BaseApp {
                             context.output(startTag, jsonObjectValue.toString());
                         } else if (page != null) {
                             //页面日志
-                            JSONArray display = jsonObjectValue.getJSONArray("display");
-                            if (display != null) {
-                                for (int i = 0; i < display.size(); i++) {
-                                    JSONObject jsonObject = display.getJSONObject(i);
+                            JSONArray displays = jsonObjectValue.getJSONArray("displays");
+                            if (displays != null) {
+                                for (int i = 0; i < displays.size(); i++) {
+                                    JSONObject display = displays.getJSONObject(i);
                                     //添加公共信息
-                                    jsonObject.put("common", common);
-                                    jsonObject.put("ts", ts);
-                                    jsonObject.put("page", page);
+                                    display.put("common", common);
+                                    display.put("ts", ts);
+                                    display.put("page", page);
                                     context.output(displayTag, display.toString());
                                 }
                             }
-                            jsonObjectValue.remove("display");
+                            jsonObjectValue.remove("displays");
 
                             JSONArray actions = jsonObjectValue.getJSONArray("actions");
                             if (actions != null) {
                                 for (int i = 0; i < actions.size(); i++) {
-                                    JSONObject jsonObject = actions.getJSONObject(i);
+                                    JSONObject action = actions.getJSONObject(i);
                                     //添加公共信息
-                                    jsonObject.put("common", common);
-                                    jsonObject.put("ts", ts);
-                                    jsonObject.put("page", page);
-                                    context.output(actionsTag, actions.toString());
+                                    action.put("common", common);
+                                    action.put("ts", ts);
+                                    action.put("page", page);
+                                    context.output(actionsTag, action.toString());
                                 }
                             }
                             jsonObjectValue.remove("actions");
