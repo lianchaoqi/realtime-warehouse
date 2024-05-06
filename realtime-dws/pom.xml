@@ -9,8 +9,13 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.jack</groupId>
     <artifactId>realtime-dws</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>realtime-dws-traffic-source-keyword-page-view-window</module>
+        <module>realtime-dws-traffic-vc-ch-ar-is_new-page-view-window</module>
+        <module>realtime-dws-user-user-login-window</module>
+    </modules>
 
     <dependencies>
         <dependency>

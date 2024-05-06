@@ -7,6 +7,11 @@ import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.apache.doris.flink.cfg.DorisExecutionOptions;
+import org.apache.doris.flink.cfg.DorisOptions;
+import org.apache.doris.flink.cfg.DorisReadOptions;
+import org.apache.doris.flink.sink.DorisSink;
+import org.apache.doris.flink.sink.writer.SimpleStringSerializer;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -22,6 +27,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.Random;
 
 /**
@@ -65,6 +71,32 @@ public class FlinkSinkUtil {
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .setTransactionalIdPrefix("jack-" + new Random().nextLong())
                 .setProperty("transaction.timeout.ms", 15 * 60 * 1000 + "")
+                .build();
+    }
+
+    public static DorisSink<String> getDorisSink(String table) {
+        Properties props = new Properties();
+        props.setProperty("format", "json");
+        props.setProperty("read_json_by_line", "true"); // 每行一条 json 数据
+        return DorisSink.<String>builder()
+                .setDorisReadOptions(DorisReadOptions.builder().build())
+                .setDorisOptions(DorisOptions.builder() // 设置 doris 的连接参数
+                        .setFenodes(Constant.DORIS_FE_NODES)
+                        .setTableIdentifier(Constant.DORIS_DATABASE+"."+table)
+                        .setUsername("root")
+                        .setPassword("root")
+                        .build()
+                )
+                .setDorisExecutionOptions(DorisExecutionOptions.builder() // 执行参数
+                        .setLabelPrefix("jack-" + System.currentTimeMillis())  // stream-load 导入数据时 label 的前缀
+                        .disable2PC() // 开启两阶段提交后,labelPrefix 需要全局唯一,为了测试方便禁用两阶段提交
+                        .setBufferCount(3) // 批次条数: 默认 3
+                        .setBufferSize(1024 * 1024) // 批次大小: 默认 1M
+                        .setCheckInterval(3000) // 批次输出间隔  上述三个批次的限制条件是或的关系
+                        .setMaxRetries(3)
+                        .setStreamLoadProp(props) // 设置 stream load 的数据格式 默认是 csv,需要改成 json
+                        .build())
+                .setSerializer(new SimpleStringSerializer())
                 .build();
     }
 }

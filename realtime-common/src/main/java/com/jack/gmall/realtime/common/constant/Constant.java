@@ -48,4 +48,10 @@ public class Constant {
 
     public static final String TOPIC_DWD_USER_REGISTER = "dwd_user_register";
 
+    public static final String DORIS_FE_NODES = "hadoop101:7030";
+
+    public static final String DORIS_DATABASE = "gmall2023_realtime";
+    public static final String DWS_TRAFFIC_VC_CH_AR_IS_NEW_PAGE_VIEW_WINDOW = "dws_traffic_vc_ch_ar_is_new_page_view_window";
+    public static final String DWS_USER_USER_LOGIN_WINDOW = "dws_user_user_login_window";
+
 }

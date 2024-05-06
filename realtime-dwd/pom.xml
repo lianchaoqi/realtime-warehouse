@@ -8,7 +8,6 @@
         <artifactId>realtime-warehouse</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <groupId>org.jack</groupId>
     <artifactId>realtime-dwd</artifactId>
     <packaging>pom</packaging>
