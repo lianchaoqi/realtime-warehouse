@@ -1,4 +1,4 @@
-package com.atguigu.gmall.realtime.dws.app;
+package com.jack.gmall.realtime.dws.app;
 
 
 import com.atguigu.gmall.realtime.dws.function.KwSplit;

@@ -9,6 +9,7 @@ import com.jack.gmall.realtime.common.function.HBaseCreateDimRichFunction;
 import com.jack.gmall.realtime.common.function.HBaseDataInsertFunction;
 import com.jack.gmall.realtime.common.util.FlinkSourceUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -39,7 +40,6 @@ public class DimApp extends BaseApp {
 
         //获取kafka的维度表业务数据
         SingleOutputStreamOperator<JSONObject> kafkaDimData = getKafkaDimData(stream);
-        kafkaDimData.print();
         //获取维度表的数据
         DataStreamSource<String> table_process_dim_source = env.fromSource(FlinkSourceUtil.getMySQLSource(
                         Constant.MYSQL_DIM_CONGFIG_DB
@@ -47,8 +47,7 @@ public class DimApp extends BaseApp {
                 , WatermarkStrategy.<String>noWatermarks()
                 , "table_process_dim_source").setParallelism(1);
 
-
-        //将获取的维度表数据生成hbase表
+//        将获取的维度表数据生成hbase表
         SingleOutputStreamOperator<TableProcessDim> hbaseDimCreateStream = table_process_dim_source.flatMap(new HBaseCreateDimRichFunction()).setParallelism(1);
         MapStateDescriptor<String, TableProcessDim> tableProcessDimMapStateDescriptor = new MapStateDescriptor<>("tableProcessDimMapStateDescriptor",
                 String.class, TableProcessDim.class);
@@ -66,6 +65,7 @@ public class DimApp extends BaseApp {
         );
 
     }
+
     private static SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> getFilterColumnStream(SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> filterDimStream) {
         return filterDimStream.map(new MapFunction<Tuple2<JSONObject, TableProcessDim>, Tuple2<JSONObject, TableProcessDim>>() {
             @Override

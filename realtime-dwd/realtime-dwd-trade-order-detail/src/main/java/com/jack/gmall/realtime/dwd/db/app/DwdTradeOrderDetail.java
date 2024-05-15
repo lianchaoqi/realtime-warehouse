@@ -43,8 +43,9 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         "data['source_id'] source_id," +
                         "data['source_type'] source_type," +
                         "data['sku_num'] sku_num," +
+                        "data['order_price'] order_price," +
                         "cast(cast(data['sku_num'] as decimal(16,2)) * " +
-                        "   cast(data['order_price'] as decimal(16,2)) as String) split_original_amount," + // 分摊原始总金额
+                        "cast(data['order_price'] as decimal(16,2)) as String) split_original_amount," + // 分摊原始总金额
                         "data['split_total_amount'] split_total_amount," +  // 分摊总金额
                         "data['split_activity_amount'] split_activity_amount," + // 分摊活动金额
                         "data['split_coupon_amount'] split_coupon_amount," + // 分摊的优惠券金额
@@ -105,6 +106,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         "cou.coupon_id," +
                         "date_format(od.create_time, 'yyyy-MM-dd') date_id," +  // 年月日
                         "od.create_time," +
+                        "od.order_price," +
                         "od.sku_num," +
                         "od.split_original_amount," +
                         "od.split_activity_amount," +
@@ -132,6 +134,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         "coupon_id string," +
                         "date_id string," +
                         "create_time string," +
+                        "order_price string," +
                         "sku_num string," +
                         "split_original_amount string," +
                         "split_activity_amount string," +
@@ -140,6 +143,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         "ts bigint," +
                         "primary key(id) not enforced " +
                         ")" + FlinkSQLUtil.getUpsertKafkaDDL(Constant.TOPIC_DWD_TRADE_ORDER_DETAIL));
+
         result.executeInsert(Constant.TOPIC_DWD_TRADE_ORDER_DETAIL);
     }
 }

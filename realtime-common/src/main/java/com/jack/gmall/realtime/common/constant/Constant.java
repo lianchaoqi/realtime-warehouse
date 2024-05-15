@@ -52,6 +52,12 @@ public class Constant {
 
     public static final String DORIS_DATABASE = "gmall2023_realtime";
     public static final String DWS_TRAFFIC_VC_CH_AR_IS_NEW_PAGE_VIEW_WINDOW = "dws_traffic_vc_ch_ar_is_new_page_view_window";
+    public static final String DWS_TRADE_SKU_ORDER_WINDOW = "dws_trade_sku_order_window";
     public static final String DWS_USER_USER_LOGIN_WINDOW = "dws_user_user_login_window";
+    /*
+    一天多少秒
+     */
+    public static final Integer DAY_SECONDS = 24 * 60 * 60;
+    public static final Integer TWO_DAY_SECONDS = 2 * 24 * 60 * 60;
 
 }

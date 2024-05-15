@@ -1,4 +1,4 @@
-package com.atguigu.gmall.realtime.dws.app;
+package com.jack.gmall.realtime.dws.app;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -8,11 +8,8 @@ import com.jack.gmall.realtime.common.constant.Constant;
 import com.jack.gmall.realtime.common.function.DorisMapFunction;
 import com.jack.gmall.realtime.common.util.DateFormatUtil;
 import com.jack.gmall.realtime.common.util.FlinkSinkUtil;
-import org.apache.doris.shaded.org.apache.arrow.vector.complex.reader.DurationReader;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
