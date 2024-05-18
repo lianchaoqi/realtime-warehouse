@@ -33,7 +33,7 @@ public abstract class BaseApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 
         // 1.3 设置并行度
-        env.setParallelism(parallelism);
+//        env.setParallelism(parallelism);
 
 //        // 1.4 状态后端及检查点相关配置
 //        // 1.4.1 设置状态后端
